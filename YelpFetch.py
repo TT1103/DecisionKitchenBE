@@ -1,4 +1,4 @@
-import requests, sys, json
+import requests, sys, json, difflib
 
 token = None
 
@@ -92,7 +92,31 @@ class YelpFetcher():
 				values.append(self.vectorize(i)[1])
 		return values
 
+	def search_string(self, lat, lon, name, isOpen=True, delivery=False):
+		apiString = "https://api.yelp.com/v3/" +  "businesses/" + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + "&term=" + name + "&is_open=" + (str(isOpen).lower() if not delivery else "")
+		print(apiString)
+		request = requests.get(apiString, headers={'Authorization': self.authtoken})
+		matches = []
+		names = []
+		print(json.loads(request.text)["businesses"])
+		if json.loads(request.text)["businesses"] == []:
+			return None
+		for i in json.loads(request.text)["businesses"]:
+			names.append(i["name"].lower())
+			if i["name"].lower() == name.lower():
+				matches.append(i)
+		if matches == []:
+			closest_strings = difflib.get_close_matches(name.lower(), names)
+			for i in json.loads(request.text)["businesses"]:
+				if i["name"].lower() in closest_strings:
+					matches.append(i)
+		dists = [i["distance"] for i in matches]
+
+
+		return matches[dists.index(min(dists))]
+
 
 
 mine = YelpFetcher(["tradamerican", "indpak", "chinese", "sushi", "mongolian"])
+print(mine.search_string(37.5737019, -122.3269701, "Starucks"))
 print(mine.vectors_nearest(37.5737019, -122.3269701, False))
