@@ -27,7 +27,6 @@ def predict_input_fn():
     feature_cols = dict(continuous_cols.items())
     return feature_cols
 
-
 def trainModel(filename, numFeatures):
     global FEATURE_COLUMNS
     global COLUMNS
@@ -37,11 +36,8 @@ def trainModel(filename, numFeatures):
     
     COLUMNS = [str(x) for x in range(numFeatures)]
     FEATURE_COLUMNS = COLUMNS[:-1]
-    featureList=[]
+    featureList=[tf.contrib.layers.real_valued_column(i) for i in FEATURE_COLUMNS]
     df_train  = pd.read_csv(filename, names=COLUMNS, skipinitialspace=True)
-
-    for f in FEATURE_COLUMNS:
-        featureList.append(tf.contrib.layers.real_valued_column(f))
         
     for c in COLUMNS:
         df_train[c] = df_train[c].astype(float)
@@ -49,7 +45,7 @@ def trainModel(filename, numFeatures):
     df_train[LABEL_COLUMN] = df_train[COLUMNS[-1]].astype(float)
 
     e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
+        learning_rate=LEARNING_RATE),model_dir="/Users/azzy_/Desktop/angelhack/DecisionKitchenBE/model")
     e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
     
     df_predict = pd.read_csv("predictdata.txt", names=FEATURE_COLUMNS, skipinitialspace=True)
@@ -61,18 +57,18 @@ def getBestRestaurants(filename, numFeatures):
     
     FEATURE_COLUMNS = [str(x) for x in range(numFeatures)]
     df_predict = pd.read_csv(filename, names=FEATURE_COLUMNS, skipinitialspace=True)
-    featureList=[]
-    for f in FEATURE_COLUMNS:
-        featureList.append(tf.contrib.layers.real_valued_column(f))
+
+    featureList = [tf.contrib.layers.real_valued_column(i) for i in FEATURE_COLUMNS]
+
         
     e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
+        learning_rate=LEARNING_RATE),model_dir="/Users/azzy_/Desktop/angelhack/DecisionKitchenBE/model")
     
-    print ("Predicting Data:")
+    print("Predicting Data:")
     results = e.predict_scores(input_fn=predict_input_fn)
     for key in sorted(results):
-        print (key)
+        print(key)
         
         
-trainModel("train.txt", 3)
-getBestRestaurants("predictdata.txt",2)
+trainModel("train.txt", 5)
+getBestRestaurants("test.txt", 4)
