@@ -22,7 +22,9 @@ class FBData:
 		if restraunts.val() != None:
 			for i in restraunts.val().keys():
 				mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
-				sols.append(mine.vectorize(mine.search_ID(i)))
+				searched = mine.search_ID(i)
+				if searched != None:
+					sols.append(mine.vectorize(searched))
 
 		response_base = self.db.child("groups").child(self.group).child("games").child("0").child("responses").get()
 		money = []
@@ -41,8 +43,14 @@ class FBData:
 				curr += k[0] * k[1]
 				if k[0] != 0:
 					count += 1
-			money[i] =  float(curr) / count
-		money = sum(money) / len(money)
+			if count != 0:
+				money[i] =  float(curr) / count
+			else:
+				money[i] = 0
+		if len(money) != 0:
+			money = sum(money) / len(money)
+		else:
+			money = 0
 
 		#Deliv is still bad
 		return sols, money, category, deliv
