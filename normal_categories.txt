@@ -1,0 +1,1 @@
+['Breakfast & Brunch', 'Chinese', 'Diners', 'Fast Food', 'Hot Pot', 'Italian', 'Japanese', 'Korean', 'Mongolian', 'Pizza', 'Steakhouses', 'Sushi Bars', 'American (Traditional)', 'Vegetarian']

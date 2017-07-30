@@ -86,7 +86,6 @@ class YelpFetcher():
 		values = []
 		if searching == []:
 			return None
-		print(searching)
 		for i in searching["businesses"]:
 			if full_data_bool:
 				values.append(self.vectorize(i))
@@ -115,10 +114,18 @@ class YelpFetcher():
 					matches.append(i)
 		dists = [i["distance"] for i in matches]
 
-
 		return matches[dists.index(min(dists))]
+
+	def search_ID(self, ID):
+		apiString = "https://api.yelp.com/v3/businesses/" + ID
+		request = requests.get(apiString, headers={'Authorization': self.authtoken})
+		return json.loads(request.text)
+
+
+
 
 
 mine = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
 print(mine.search_string(37.5737019, -122.3269701, "Starbucks"))
 print(mine.vectors_nearest(37.5737019, -122.3269701, True))
+print(mine.search_ID("heidis-pies-restaurant-san-mateo"))
