@@ -119,6 +119,9 @@ class YelpFetcher():
 	def search_ID(self, ID):
 		apiString = "https://api.yelp.com/v3/businesses/" + ID
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
+		print(json.loads(request.text).keys())
+		if "error" in json.loads(request.text).keys():
+			return None
 		return json.loads(request.text)
 
 

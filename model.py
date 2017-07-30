@@ -25,7 +25,10 @@ class Model():
     
     @staticmethod
     def deleteModels():
-        shutil.rmtree(MODEL_DIR)
+        try:
+            shutil.rmtree(MODEL_DIR)
+        except:
+            pass
         
         
     def input_fn(self, df):
@@ -84,10 +87,5 @@ class Model():
         ret = []
         for r in sorted(results):
             ret.append(r)
-        return ret
+        return ret[::-1]
             
-        
-Model.deleteModels()
-model = Model(4)
-model.trainModel("train.txt")
-print (model.getPrediction("predictdata.txt"))
