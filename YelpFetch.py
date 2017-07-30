@@ -93,12 +93,13 @@ class YelpFetcher():
 		return values
 
 	def search_string(self, lat, lon, name, isOpen=True, delivery=False):
+		# Returns the json for a restaurant which is the closest to a given string, if there are multiple places
+		#  with the same name this will select the closest one.
 		apiString = "https://api.yelp.com/v3/" +  "businesses/" + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + "&term=" + name + "&is_open=" + (str(isOpen).lower() if not delivery else "")
 		print(apiString)
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		matches = []
 		names = []
-		print(json.loads(request.text)["businesses"])
 		if json.loads(request.text)["businesses"] == []:
 			return None
 		for i in json.loads(request.text)["businesses"]:
