@@ -88,6 +88,6 @@ class Model():
             
         
 Model.deleteModels()
-model = Model(5)
+model = Model(4)
 model.trainModel("train.txt")
-print (model.getPrediction("test.txt"))
+print (model.getPrediction("predictdata.txt"))
