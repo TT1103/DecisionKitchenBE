@@ -28,9 +28,8 @@ class YelpFetcher():
 		self.aliases = aliases
 
 
-	def search(self, lat, lon, price=[], isOpen=True, delivery=False):
-		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
-		print(apiString)
+	def search(self, lat, lon, price=[], isOpen=True, delivery=False, radius=13000):
+		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&radius=" + str(radius) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		return json.loads(request.text)
 
@@ -117,7 +116,6 @@ class YelpFetcher():
 		return matches[dists.index(min(dists))]
 
 
-
 mine = YelpFetcher(["tradamerican", "indpak", "chinese", "sushi", "mongolian"])
-print(mine.search_string(37.5737019, -122.3269701, "Starucks"))
+print(mine.search_string(37.5737019, -122.3269701, "Starbucks"))
 print(mine.vectors_nearest(37.5737019, -122.3269701, False))
