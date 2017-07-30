@@ -12,12 +12,12 @@ except:
 	sys.exit(1)
 
 with open("categories.json", "r") as file:
-    b = json.load(file)
-    parents = {}
-    for i in b:
-        for k in range(len(i["parents"])):
-            parents.setdefault(i["parents"][k], [])
-            parents[i["parents"][k]].extend([i["title"],i["alias"]])
+	b = json.load(file)
+	parents = {}
+	for i in b:
+		for k in range(len(i["parents"])):
+			parents.setdefault(i["parents"][k], [])
+			parents[i["parents"][k]].extend([i["title"],i["alias"]])
 
 # Search queries Yelp's API and returns a dict with the info.
 
@@ -28,9 +28,8 @@ class YelpFetcher():
 		self.aliases = aliases
 
 
-	def search(self, lat, lon, price=[], isOpen=True, delivery=False):
-		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
-		print(apiString)
+	def search(self, lat, lon, price=[], isOpen=True, delivery=False, radius=13000):
+		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&radius=" + str(radius) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		return json.loads(request.text)
 
@@ -85,6 +84,9 @@ class YelpFetcher():
 		# Note that delivery/open is always bool set to true/false
 		searching = self.search(lat, lon)
 		values = []
+		if searching == []:
+			return None
+		print(searching)
 		for i in searching["businesses"]:
 			if full_data_bool:
 				values.append(self.vectorize(i))
@@ -92,10 +94,10 @@ class YelpFetcher():
 				values.append(self.vectorize(i)[1])
 		return values
 
-	def search_string(self, lat, lon, name, isOpen=True, delivery=False):
+	def search_string(self, lat, lon, name, isOpen=True, delivery=False, radius=13000):
 		# Returns the json for a restaurant which is the closest to a given string, if there are multiple places
 		#  with the same name this will select the closest one.
-		apiString = "https://api.yelp.com/v3/" +  "businesses/" + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + "&term=" + name + "&is_open=" + (str(isOpen).lower() if not delivery else "")
+		apiString = "https://api.yelp.com/v3/" +  "businesses/" + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + "&radius=" + str(radius) + "&term=" + name + "&is_open=" + (str(isOpen).lower() if not delivery else "")
 		print(apiString)
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		matches = []
@@ -117,7 +119,6 @@ class YelpFetcher():
 		return matches[dists.index(min(dists))]
 
 
-
-mine = YelpFetcher(["tradamerican", "indpak", "chinese", "sushi", "mongolian"])
-print(mine.search_string(37.5737019, -122.3269701, "Starucks"))
-print(mine.vectors_nearest(37.5737019, -122.3269701, False))
+mine = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
+print(mine.search_string(37.5737019, -122.3269701, "Starbucks"))
+print(mine.vectors_nearest(37.5737019, -122.3269701, True))
