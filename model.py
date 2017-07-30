@@ -5,7 +5,7 @@ import pandas as pd
 
 TRAINING_STEPS = 200
 COLUMNS = ["Category_rank", "Price", "Rating", "Rating_Count", "Correctness"]
-LABEL_COLUMN = "Label"
+LABEL_COLUMN = "label"
 df_train = pd.read_csv("train.txt", names=COLUMNS, skipinitialspace=True)
 df_test = pd.read_csv("test.txt", names=COLUMNS, skipinitialspace=True)
 
