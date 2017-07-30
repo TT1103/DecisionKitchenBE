@@ -1,5 +1,3 @@
-import tempfile
-import urllib
 import tensorflow as tf
 import pandas as pd
 import shutil
