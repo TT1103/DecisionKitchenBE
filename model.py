@@ -2,73 +2,94 @@ import tempfile
 import urllib
 import tensorflow as tf
 import pandas as pd
-
+import shutil
 
 TRAINING_STEPS = 1000
 LABEL_COLUMN = "label"
 LEARNING_RATE = 0.1
-FEATURE_COLUMNS = []
-COLUMNS = []
-df_train = None
-df_predict = None
-featureList = None
-def input_fn(df):
-    continuous_cols = {i: tf.constant(df[i].values) for i in FEATURE_COLUMNS}
-    feature_cols = dict(continuous_cols.items())
-    label = tf.constant(df[LABEL_COLUMN].values)
-    return feature_cols, label
+MODEL_DIR="./model"
 
+class Model():
+    def __init__(self, numFeatures):
 
-def train_input_fn():
-    return input_fn(df_train)
-
-def predict_input_fn():
-    continuous_cols = {i: tf.constant(df_predict[i].values) for i in FEATURE_COLUMNS}
-    feature_cols = dict(continuous_cols.items())
-    return feature_cols
-
-def trainModel(filename, numFeatures):
-    global FEATURE_COLUMNS
-    global COLUMNS
-    global df_train
-    global df_predict
-    global featureList
-    
-    COLUMNS = [str(x) for x in range(numFeatures)]
-    FEATURE_COLUMNS = COLUMNS[:-1]
-    featureList=[tf.contrib.layers.real_valued_column(i) for i in FEATURE_COLUMNS]
-    df_train  = pd.read_csv(filename, names=COLUMNS, skipinitialspace=True)
+        global TRAINING_STEPS
+        global LABEL_COLUMN
+        global LEARNING_RATE
+        global MODEL_DIR
         
-    for c in COLUMNS:
-        df_train[c] = df_train[c].astype(float)
-
-    df_train[LABEL_COLUMN] = df_train[COLUMNS[-1]].astype(float)
-
-    e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="./model")
-    e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
+        self.FEATURE_COLUMNS = []
+        self.COLUMNS = []
+        self.df_train = None
+        self.df_predict = None
+        self.featureList = None
+        self.curModel = None
+        self.numFeatures = numFeatures
     
-    df_predict = pd.read_csv("predictdata.txt", names=FEATURE_COLUMNS, skipinitialspace=True)
-    
-
-def getBestRestaurants(filename, numFeatures):
-    global df_predict 
-    global FEATURE_COLUMNS
-    
-    FEATURE_COLUMNS = [str(x) for x in range(numFeatures)]
-    df_predict = pd.read_csv(filename, names=FEATURE_COLUMNS, skipinitialspace=True)
-
-    featureList = [tf.contrib.layers.real_valued_column(i) for i in FEATURE_COLUMNS]
-
-        
-    e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="./model")
-    
-    print("Predicting Data:")
-    results = e.predict_scores(input_fn=predict_input_fn)
-    for key in sorted(results):
-        print(key)
+    @staticmethod
+    def deleteModels():
+        shutil.rmtree(MODEL_DIR)
         
         
-trainModel("train.txt", 5)
-getBestRestaurants("test.txt", 4)
+    def input_fn(self, df):
+        continuous_cols = {i: tf.constant(df[i].values) for i in self.FEATURE_COLUMNS}
+        feature_cols = dict(continuous_cols.items())
+        label = tf.constant(df[LABEL_COLUMN].values)
+        return feature_cols, label
+
+    
+    def train_input_fn(self):
+        return self.input_fn(self.df_train)
+
+    
+    def predict_input_fn(self):
+        continuous_cols = {i: tf.constant(self.df_predict[i].values) for i in self.FEATURE_COLUMNS}
+        feature_cols = dict(continuous_cols.items())
+        return feature_cols
+
+    
+    def trainModel(self, filename):
+        self.COLUMNS = [str(x) for x in range(self.numFeatures)]
+        self.FEATURE_COLUMNS = self.COLUMNS[:-1]
+        fList = [tf.contrib.layers.real_valued_column(i) for i in self.FEATURE_COLUMNS]
+        self.df_train  = pd.read_csv(filename, names=self.COLUMNS, skipinitialspace=True)
+
+        for c in self.COLUMNS:
+            self.df_train[c] = self.df_train[c].astype(float)
+
+        self.df_train[LABEL_COLUMN] = self.df_train[self.COLUMNS[-1]].astype(float)
+
+        e = tf.contrib.learn.LinearRegressor(feature_columns = fList, optimizer = tf.train.FtrlOptimizer(
+            learning_rate = LEARNING_RATE), model_dir = MODEL_DIR)
+        
+        e.fit(input_fn = self.train_input_fn, steps = TRAINING_STEPS)
+
+        self.curModel = e
+        self.featureList = fList
+    
+    
+    def loadModel(self):
+        self.FEATURE_COLUMNS = [str(x) for x in range(self.numFeatures-1)]
+
+        self.featureList = [tf.contrib.layers.real_valued_column(i) for i in self.FEATURE_COLUMNS]
+
+        self.curModel = tf.contrib.learn.LinearRegressor(feature_columns = self.featureList, optimizer = tf.train.FtrlOptimizer(learning_rate = LEARNING_RATE), model_dir = MODEL_DIR)
+       
+        
+    def getPrediction(self, filename):
+        if (not self.curModel):
+            self.loadModel()
+
+        print("Predicting Data:")
+        self.df_predict = pd.read_csv(filename, names = self.FEATURE_COLUMNS, skipinitialspace = True)
+
+        results = self.curModel.predict_scores(input_fn = self.predict_input_fn)
+        ret = []
+        for r in sorted(results):
+            ret.append(r)
+        return ret
+            
+        
+Model.deleteModels()
+model = Model(5)
+model.trainModel("train.txt")
+print (model.getPrediction("test.txt"))
