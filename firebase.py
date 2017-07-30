@@ -11,7 +11,7 @@ class FBData:
 		}
 
 		self.firebase = pyrebase.initialize_app(self.config)
-		self.firebase.auth().signInAnonymously()
+		#self.firebase.auth().signInAnonymously()
 
 
 		self.db = self.firebase.database()
@@ -22,25 +22,24 @@ class FBData:
 		sols = []
 		for i in restraunts.val().keys():
 			mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
-			sols.append(mine.vectorize(mine.search_ID(i))[1])
+			sols.append(mine.vectorize(mine.search_ID(i)))
 
 		response_base = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("games").child("0").child("responses").get()
-		for i in response_base.val().keys():
+		money = []
+		category = []
+		deliv = []
+		for i in response_base.val().values():
+			money.append(i[0])
+			category.append(i[1])
+			deliv.append(i[2])
 
 
-		return sols
+
+
+		return sols, money, category, deliv
 	# Fix authentication
 	# only search good ids
 	# add additional case for no categories
-    
-    def saveResponse(res):
-        pass
-    
-    def isDone():
-        pass
-    
-    
-
 
 
 FBData().start()
