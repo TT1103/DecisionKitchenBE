@@ -1,9 +1,5 @@
-
 import pyrebase
-import pyautogui
-import time
-import getpass
-from math import sqrt, pi
+import YelpFetch
 
 class FBData:
 	def __init__(self):
@@ -15,15 +11,23 @@ class FBData:
 		}
 
 		self.firebase = pyrebase.initialize_app(self.config)
+		self.firebase.auth().signInAnonymously()
+
+
 		self.db = self.firebase.database()
 
 	def start(self):
 		print("hello")
-		users = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').get()
-		print(users.val())
+		users = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("restaurants").get()
+		sols = []
+		for i in users.val().keys():
+			mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
+			sols.append(mine.vectorize(mine.search_ID(i))[1])
+		return sols
+	# Fix authentication
+	# only search good ids
+	# add additional case for no categories
 
-	def streamHandler(self, post):
-		print("back")
 
 
 FBData().start()
