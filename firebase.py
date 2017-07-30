@@ -71,8 +71,8 @@ class FBData:
 			return False
 
 	def push_update(self, top_restaurants):
-		data = {"The best restaurants in order:" : top_restaurants }
-		self.db.child("groups").child(self.group).child("games").child("0").child("result").push(data)
+		data = top_restaurants
+		self.db.child("groups").child(self.group).child("games").child("0").child("result").set(data)
 		return True
 
 
