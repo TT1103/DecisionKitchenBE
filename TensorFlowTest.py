@@ -1,78 +1,35 @@
 import tempfile
 import urllib
 import tensorflow as tf
-import pandas as pd
+import pandas as panda
+import TestGenerator
 
 
-TRAINING_STEPS = 200
-
-featureData = [] # get an array of values from austin that are already parsed
-
-featureList = []
-'''
-#iterate through the featuresData and create a feature for each data piece
-for i in range(len(featureData)):
-    temp = tf.contrib.layers.real_valued_column(str(i))
-    featureList.append(temp) 
-
-ids = range(len(featureData))
-'''
-df_train = pd.read_csv(train_file, names=ids, skipinitialspace=True)
-print (type(df_train))
+COLUMNS = []
+CATEGORIES = ["American", "Indian", "Chinese", "Sushi", "Mongolian"]
+COLUMNS.extend(CATEGORIES)
+COLUMNS.extend(["Price", "Rating", "Rating_Count", "Correctness"])
+LABEL_COLUMN = "Label"
+df_train = TestGenerator.make_test_vectors(3, 5, COLUMNS)
+df_test = TestGenerator.make_test_vectors(200, 5, COLUMNS)
 
 
-'''
-
-
-e = tf.contrib.learn.LinearClassifier(feature_columns=featureList) 
-e.fit(input_fn=input_fn_train, steps=TRAINING_STEPS)
-
-# Evaluate for one step (one pass through the test data).
-results = e.evaluate(input_fn=input_fn_test, steps=1)
-
-# Print the stats for the evaluation.
-for key in sorted(results):
-        print("%s: %s" % (key, results[key]))
-
-
-
-
-
-
-
-
-
-
-#COLUMNS = ["Category", "Price", "Rating", "Rating_Count", "Correctness"]
-#LABEL_COLUMN = "Label"
-df_train =
-df_test =
-#df_train[LABEL_COLUMN] = df_train["Correctness"]
-#df_test[LABEL_COLUMN] = df_test["Correctness"]
-
-
-CATEGORICAL_COLUMNS = ["Category"]
-CONTINUOUS_COLUMNS = ["Price", "Rating", "Rating_Count"]
+df_train[LABEL_COLUMN] = df_train["Correctness"]
+df_test[LABEL_COLUMN] = df_test["Correctness"]
 
 
 
 def input_fn(df):
-  continuous_cols = {i: tf.constant(df[i].values)
-                     for i in CONTINUOUS_COLUMNS}
-  categorical_cols = {k: tf.SparseTensor(
-      indices=[[i, 0] for i in range(df[k].size)],
-      values=df[k].values,
-      dense_shape=[df[k].size, 1])
-                      for k in CATEGORICAL_COLUMNS}
-  # Merges the two dictionaries into one.
-  feature_cols = dict(continuous_cols.items() + categorical_cols.items())
+  feature_cols = {i: tf.constant(df[i].values)
+                     for i in COLUMNS}
   # Converts the label column into a constant Tensor.
   label = tf.constant(df[LABEL_COLUMN].values)
   # Returns the feature columns and the label.
   return feature_cols, label
+model_dir = tempfile.mkdtemp()
+feature_columns = [tf.contrib.layers.real_valued_column(i) for i in COLUMNS]
 
-
-
+m = tf.contrib.learn.LinearClassifier(feature_columns=feature_columns, model_dir=model_dir)
 
 
 def train_input_fn():
@@ -81,4 +38,7 @@ def train_input_fn():
 def eval_input_fn():
   return input_fn(df_test)
 
-  '''
+m.fit(input_fn=train_input_fn, steps=200)
+results = m.evaluate(input_fn=eval_input_fn, steps=1)
+for key in sorted(results):
+    print("%s: %s" % (key, results[key]))

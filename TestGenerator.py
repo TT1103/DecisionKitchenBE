@@ -7,19 +7,21 @@ def combine_categories(restraunt_categories, user_categories):
         combined.append(i[0] * i[1])
     return combined
 
-def make_test_vectors(amount, num_categories):
-    # Vector format: [[American, Indian, Chinese, Sushi, Mongolian], Price, Rating, Rating_Count]
+def make_test_vectors(amount, num_categories, COLUMNS):
+    # Vector format: [[American, Indian, Chinese, Sushi, Mongolian], Price, Rating, Rating_Count, Correctness]
     # Return [vector ... vector]
+    file = open("Tensor.txt", "rw")
+    file.write(i + "," for i in COLUMNS)
     tests = []
     for i in range(amount):
-        test = []
-        categories = []
+        test = {}
         for i in range(num_categories):
-            categories.append(random.randint(0,1))
-        test.append(categories)
-        test.append(random.randint(1,4))
-        test.append(random.randint(1,5))
-        test.append(random.randint(1,1000))
+            test[COLUMNS[i]] = random.randint(0,1)
+        test[COLUMNS[num_categories]] = random.randint(1,4)
+        test[COLUMNS[num_categories+1]] = random.randint(1,5)
+        test[COLUMNS[num_categories+2]] = random.randint(1,1000)
+        test[COLUMNS[num_categories+3]] = random.random()
         tests.append(test)
     return tests
 
+print(make_test_vectors(4, 5, ["American", "Indian", "Chinese", "Sushi", "Mongolian", "Price", "Rating", "Rating_Count", "Correctness"]))
