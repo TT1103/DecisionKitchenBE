@@ -45,7 +45,7 @@ def trainModel(filename, numFeatures):
     df_train[LABEL_COLUMN] = df_train[COLUMNS[-1]].astype(float)
 
     e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="/Users/azzy_/Desktop/angelhack/DecisionKitchenBE/model")
+        learning_rate=LEARNING_RATE),model_dir="./model")
     e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
     
     df_predict = pd.read_csv("predictdata.txt", names=FEATURE_COLUMNS, skipinitialspace=True)
@@ -62,7 +62,7 @@ def getBestRestaurants(filename, numFeatures):
 
         
     e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=LEARNING_RATE),model_dir="/Users/azzy_/Desktop/angelhack/DecisionKitchenBE/model")
+        learning_rate=LEARNING_RATE),model_dir="./model")
     
     print("Predicting Data:")
     results = e.predict_scores(input_fn=predict_input_fn)
