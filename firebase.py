@@ -26,34 +26,37 @@ class FBData:
 				if searched != None:
 					sols.append(mine.vectorize(searched))
 
-		response_base = self.db.child("groups").child(self.group).child("games").child("0").child("responses").get()
-		money = []
+
+		money_total = []
 		category = []
 		deliv = []
-		if response_base.val() != None:
-			for i in response_base.val().values():
-				money.append(i[0])
-				category.append(i[1])
-				deliv.append(i[2])
 
-		for i in range(len(money)):
-			curr = 0
-			count = 0
-			for k in zip(money[i], [1,2,3,4]):
-				curr += k[0] * k[1]
-				if k[0] != 0:
-					count += 1
-			if count != 0:
-				money[i] =  float(curr) / count
+		for j in self.db.child("groups").child(self.group).child("games").child("0").child("responses").get().each():
+			print(j.val())
+			money = []
+			if j.val() != None:
+				money.append(j.val()[0])
+				category.append(j.val()[1])
+				deliv.append(j.val()[2])
+
+			for i in range(len(money)):
+				curr = 0
+				count = 0
+				for k in zip(money[i], [1,2,3,4]):
+					curr += k[0] * k[1]
+					if k[0] != 0:
+						count += 1
+				if count != 0:
+					money[i] =  float(curr) / count
+				else:
+					money[i] = 0
+			if len(money) != 0:
+				money = sum(money) / len(money)
 			else:
-				money[i] = 0
-		if len(money) != 0:
-			money = sum(money) / len(money)
-		else:
-			money = 0
-
+				money = 0
+			money_total.append(money)
 		#Deliv is still bad
-		return sols, money, category, deliv
+		return filter(lambda x: x != None, sols), money, category, deliv
 	# Fix authentication
 	# only search good ids
 	# add additional case for no categories
@@ -73,5 +76,5 @@ class FBData:
 		return True
 
 
-FBData("2120b04c-bd1e-42c8-abf1-08fd8fde8133").start()
+FBData("-KqJWkCu3YTpbMJi2u8U").start()
 #print(FBData().push_update([[i for i in range(20)] for k in range(20)]))
