@@ -28,18 +28,26 @@ class FBData:
 		money = []
 		category = []
 		deliv = []
-		for i in response_base.val().values():
-			money.append(i[0])
-			category.append(i[1])
-			deliv.append(i[2])
-
-
-
+		if response_base.val() != None:
+			for i in response_base.val().values():
+				money.append(i[0])
+				category.append(i[1])
+				deliv.append(i[2])
 
 		return sols, money, category, deliv
 	# Fix authentication
 	# only search good ids
 	# add additional case for no categories
 
+	def is_done(self, num_players):
+		response_base = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("games").child("0").child("responses").get()
+		if response_base.val() == None:
+			return False
+		if len(response_base.val().keys()) >= num_players:
+			return True
+		else:
+			return False
+
 
 FBData().start()
+print(FBData().is_done(1))

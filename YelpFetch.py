@@ -28,8 +28,8 @@ class YelpFetcher():
 		self.aliases = aliases
 
 
-	def search(self, lat, lon, price=[], isOpen=True, delivery=False, radius=13000):
-		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&radius=" + str(radius) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
+	def search(self, lat, lon, price=[], isOpen=True, delivery=False, radius=13000, limit=50):
+		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&radius=" + str(radius) + "&limit=" + str(limit) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		return json.loads(request.text)
 
