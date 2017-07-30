@@ -10,7 +10,7 @@ def main():
    # model.trainModel("official_train.txt")           
     #print (model.getPrediction("predictdata.txt"))
     model.loadModel()
-    fb = FBData("-KqJjXfSPtw1L-AiHjg_")
+    fb = FBData("-KqK2DFRvziwDxcMqXnm")
     
     yelp = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese',   'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
     
@@ -18,7 +18,7 @@ def main():
     while not done:
         time.sleep(1)
         print ("waiting")
-        done=fb.is_done(4)
+        done=fb.is_done(2)
     
 
     time.sleep(1)
