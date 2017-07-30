@@ -6,87 +6,69 @@ import pandas as pd
 
 TRAINING_STEPS = 1000
 LABEL_COLUMN = "label"
+LEARNING_RATE = 0.1
+FEATURE_COLUMNS = []
+COLUMNS = []
+df_train = None
+df_predict = None
 def input_fn(df):
     continuous_cols = {i: tf.constant(df[i].values) for i in FEATURE_COLUMNS}
-    print ("Cont cols: ", continuous_cols)
     feature_cols = dict(continuous_cols.items())
-    print ("Featurecols: ",feature_cols)
-    # Converts the label column into a constant Tensor.
     label = tf.constant(df[LABEL_COLUMN].values)
-    print ("Label: " , label)
-    # Returns the feature columns and the label.
     return feature_cols, label
 
 
-def train_input_fn(df_train):
+def train_input_fn():
     return input_fn(df_train)
 
-def eval_input_fn():
-    return input_fn(df_test)
-
 def predict_input_fn():
-    df=df_predict
-    continuous_cols = {i: tf.constant(df[i].values) for i in ["a","b"]}
+    continuous_cols = {i: tf.constant(df_predict[i].values) for i in FEATURE_COLUMNS}
     feature_cols = dict(continuous_cols.items())
     return feature_cols
 
 
-def trainModel(inputData):
+def trainModel(filename, numFeatures):
+    global FEATURE_COLUMNS
+    global COLUMNS
+    global df_train
+    global df_predict
     
-    COLUMNS = ["a","b","c"]
-    FEATURE_COLUMNS = ["a","b"]
-
-    df_train  = pd.read_csv("traindata.txt", names=COLUMNS, skipinitialspace=True)
-    df_test = pd.read_csv("testdata.txt", names=COLUMNS, skipinitialspace=True)
-    df_predict = pd.read_csv("predictdata.txt", names=["a","b"], skipinitialspace=True)
-    #print (type(df_train))
-    #print (df_train)
-
+    COLUMNS = [str(x) for x in range(numFeatures)]
+    FEATURE_COLUMNS = COLUMNS[:-1]
     featureList=[]
-    a = tf.contrib.layers.real_valued_column("a")
-    featureList.append(a) 
+    df_train  = pd.read_csv(filename, names=COLUMNS, skipinitialspace=True)
 
-    b = tf.contrib.layers.real_valued_column("b")
-    featureList.append(b) 
+    for f in FEATURE_COLUMNS:
+        featureList.append(tf.contrib.layers.real_valued_column(f))
+        
+    for c in COLUMNS:
+        df_train[c] = df_train[c].astype(float)
 
-    print ("DF: ", df_train["c"])
-
-    df_train["label"] = df_train["c"].astype(float)
-    df_test["label"] = df_test["c"].astype(float)
-
-    df_train["a"] = df_train["a"].astype(float)
-    df_train["b"] = df_train["b"].astype(float)
-    df_train["c"] = df_train["c"].astype(float)
-
-    df_test["a"] = df_test["a"].astype(float)
-    df_test["b"] = df_test["b"].astype(float)
-    df_test["c"] = df_test["c"].astype(float)
-
-    
+    df_train[LABEL_COLUMN] = df_train[COLUMNS[-1]].astype(float)
 
     e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
-        learning_rate=0.1),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
+        learning_rate=LEARNING_RATE),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
     e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
-
-
-    print (e)
-
-    print ("Showing test results:")
+    
+    
+    df_predict = pd.read_csv("predictdata.txt", names=FEATURE_COLUMNS, skipinitialspace=True)
+    
+    
+    #debug, remove later
+    print ("Predicting Data:")
     results = e.predict_scores(input_fn=predict_input_fn)
     for key in sorted(results):
         print (key)
+    
 
+def getBestRestaurants(filename, numFeatures):
+    with tf.Session(graph=graph) as session:
+        checkpoint = tf.train.get_checkpoint_state("/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model")
+        saver.restore(session, ckpt.model_checkpoint_path)
+        feed_dict = {tf_train_dataset : batch_data}
+        predictions = session.run([test_prediction], feed_dict)
+    
+    
 
-
-    '''
-    # Evaluate for one step (one pass through the test data).
-    results = e.evaluate(input_fn=input_fn_test, steps=1)
-
-    # Print the stats for the evaluation.
-    for key in sorted(results):
-            print("%s: %s" % (key, results[key]))
-    '''
-
-trainModel()
-def getBestRestaurants(predictData):
-    pass
+trainModel("train.txt", 3)
+getBestRestaurants("predictdata.txt",2)
