@@ -2,7 +2,7 @@ import pyrebase
 import YelpFetch
 
 class FBData:
-	def __init__(self):
+	def __init__(self, group):
 		self.config = {
 			"apiKey": "AIzaSyDtENByjPjjrXyoBWEr7Tr4to9ypS_EU38",
 			"authDomain": "decisionkitchen.firebaseapp.com/",
@@ -13,18 +13,18 @@ class FBData:
 		self.firebase = pyrebase.initialize_app(self.config)
 		#self.firebase.auth().signInAnonymously()
 
-
+		self.group = group
 		self.db = self.firebase.database()
 
 	def start(self):
-		restraunts = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("restaurants").get()
+		restraunts = self.db.child("groups").child(self.group).child("restaurants").get()
 		sols = []
 		if restraunts.val() != None:
 			for i in restraunts.val().keys():
 				mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
 				sols.append(mine.vectorize(mine.search_ID(i)))
 
-		response_base = self.db.child("groups").child('21d0b04c-bd1e-42c8-abf1-08fd8fde8133').child("games").child("0").child("responses").get()
+		response_base = self.db.child("groups").child(self.group).child("games").child("0").child("responses").get()
 		money = []
 		category = []
 		deliv = []
@@ -41,7 +41,7 @@ class FBData:
 				curr += k[0] * k[1]
 				if k[0] != 0:
 					count += 1
-			money[i] = curr/count
+			money[i] =  float(curr) / count
 		money = sum(money) / len(money)
 
 		#Deliv is still bad
@@ -51,7 +51,7 @@ class FBData:
 	# add additional case for no categories
 
 	def is_done(self, num_players):
-		response_base = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("games").child("0").child("responses").get()
+		response_base = self.db.child("groups").child(self.group).child("games").child("0").child("responses").get()
 		if response_base.val() == None:
 			return False
 		if len(response_base.val().keys()) >= num_players:
@@ -60,11 +60,10 @@ class FBData:
 			return False
 
 	def push_update(self, top_restaurants):
-		for i in range(10):
-			data = {"the number {} restaurant".format(i+1) : "{}".format(top_restaurants[i][0])}
-			self.db.child("groups").child("solution").set(data)
+		data = {"The best restaurants in order:" : top_restaurants }
+		self.db.child("groups").child(self.group).child("games").child("0").child("result").push(data)
 		return True
 
 
-FBData().start()
-print(FBData().push_update([[i for i in range(20)] for k in range(20)]))
+FBData("2120b04c-bd1e-42c8-abf1-08fd8fde8133").start()
+#print(FBData().push_update([[i for i in range(20)] for k in range(20)]))
