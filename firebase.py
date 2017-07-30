@@ -17,14 +17,14 @@ class FBData:
 		self.db = self.firebase.database()
 
 	def start(self):
-		print("hello")
 		restraunts = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("restaurants").get()
 		sols = []
-		for i in restraunts.val().keys():
-			mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
-			sols.append(mine.vectorize(mine.search_ID(i)))
+		if restraunts.val() != None:
+			for i in restraunts.val().keys():
+				mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
+				sols.append(mine.vectorize(mine.search_ID(i)))
 
-		response_base = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("games").child("0").child("responses").get()
+		response_base = self.db.child("groups").child('21d0b04c-bd1e-42c8-abf1-08fd8fde8133').child("games").child("0").child("responses").get()
 		money = []
 		category = []
 		deliv = []
@@ -34,6 +34,17 @@ class FBData:
 				category.append(i[1])
 				deliv.append(i[2])
 
+		for i in range(len(money)):
+			curr = 0
+			count = 0
+			for k in zip(money[i], [1,2,3,4]):
+				curr += k[0] * k[1]
+				if k[0] != 0:
+					count += 1
+			money[i] = curr/count
+		money = sum(money) / len(money)
+
+		#Deliv is still bad
 		return sols, money, category, deliv
 	# Fix authentication
 	# only search good ids
@@ -48,6 +59,12 @@ class FBData:
 		else:
 			return False
 
+	def push_update(self, top_restaurants):
+		for i in range(10):
+			data = {"the number {} restaurant".format(i+1) : "{}".format(top_restaurants[i][0])}
+			self.db.child("groups").child("solution").set(data)
+		return True
+
 
 FBData().start()
-print(FBData().is_done(1))
+print(FBData().push_update([[i for i in range(20)] for k in range(20)]))
