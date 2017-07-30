@@ -30,13 +30,13 @@ class FBData:
         money_total = []
         category = []
         deliv = []
-        for j in self.db.child("groups").child(self.group).child("games").child("0").child("responses").child("K80jnIlOCfatdYTDKowlDn1oszf1").get().each()[:1]:
-            print("jval: ",j.val())
+        for l in self.db.child("groups").child(self.group).child("games").child("0").child("responses").get().each():
+            j = l.val()["value"]
             money = []
-            if j.val() != None:
-                money.append(j.val()[0])
-                category.append(j.val()[1])
-                deliv.append(j.val()[2])
+            if j != None:
+                money.append(j[0])
+                category.append(j[1])
+                deliv.append(j[2])
 
             for i in range(len(money)):
                 curr = 0
@@ -77,7 +77,14 @@ class FBData:
         for restaurant in data:
             if restaurants == None or (not restaurant[0] in restaurants): # Push to firebase
                 data = fetcher.search_ID(restaurant[0])
-                print(data)
+                self.db.child("groups").child(self.group).child("restaurants").child(data["id"]).set({
+                    "address": data["location"]["address1"],
+                    "city": data["location"]["city"],
+                    "name": data["name"],
+                    "id": data["id"],
+                    "zip": data["location"]["zip_code"],
+                    "state": data["location"]["state"]
+                })
 
         self.db.child("groups").child(self.group).child("games").child("0").child("result").set(data)
         return True
