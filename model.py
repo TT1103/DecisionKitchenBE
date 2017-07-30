@@ -1,5 +1,4 @@
 import tempfile
-import urllib
 import tensorflow as tf
 import pandas as pd
 
@@ -41,16 +40,9 @@ e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
 
 
 print(e)
-''
+
 results = e.predict_scores(input_fn=eval_input_fn)
 for key in sorted(results):
     print(key)
-'''
-# Evaluate for one step (one pass through the test data).
-results = e.evaluate(input_fn=input_fn_test, steps=1)
 
-# Print the stats for the evaluation.
-for key in sorted(results):
-        print("%s: %s" % (key, results[key]))
-'''
 
