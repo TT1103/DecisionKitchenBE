@@ -10,7 +10,7 @@ def main():
    # model.trainModel("official_train.txt")           
     #print (model.getPrediction("predictdata.txt"))
     model.loadModel()
-    fb = FBData("-KqJWkCu3YTpbMJi2u8U")
+    fb = FBData("-KqJjXfSPtw1L-AiHjg_")
     
     yelp = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese',   'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
     
