@@ -124,8 +124,9 @@ class YelpFetcher():
 
 
 
-
+'''
 mine = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
 print(mine.search_string(37.5737019, -122.3269701, "Starbucks"))
 print(mine.vectors_nearest(37.5737019, -122.3269701, True))
 print(mine.search_ID("heidis-pies-restaurant-san-mateo"))
+'''
