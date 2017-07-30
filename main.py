@@ -10,7 +10,7 @@ def main():
    # model.trainModel("official_train.txt")           
     #print (model.getPrediction("predictdata.txt"))
     model.loadModel()
-    fb = FBData("2120b04c-bd1e-42c8-abf1-08fd8fde8133")
+    fb = FBData("-KqJWkCu3YTpbMJi2u8U")
     
     yelp = YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese',   'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
     
@@ -24,10 +24,9 @@ def main():
 
         userArr=[]
         #userArr contains [categoriesArr, price]
-        #firebaserestArry contains [categoriesArr, priceArr] 
+        #userRestData firebaserestArry contains [categoriesArr, priceArr,rating, rating #] 
         #
-        print (userRestData)        
-        
+        print ("user rest data: ",userRestData)        
         userCatComp=[0.0 for x in range(len(userCatData[0]))]
         cnt=0.0
         for c in userCatData:
@@ -39,7 +38,6 @@ def main():
 
         userArr = [userCatComp, userPriceComp]
 
-        print (userCatData)
         yelpRestDict = {} #dict of restaurants to query key: id, value: vector [categoryArr, price, rating, rating #
 
         yelpRestData = yelp.vectors_nearest(37.5737019, -122.3269701, True)
@@ -51,7 +49,8 @@ def main():
                 yelpRestDict[str(yelpId)] = yelpRestData[i][1]
 
 
-
+                
+        #check yelp restaurants
         restKeyList = list(yelpRestDict.keys())
 
         fileStr=""
@@ -60,7 +59,6 @@ def main():
 
             tmp = [str(x) for x in tmp]
             fileStr +=",".join(tmp) +"\n"
-
 
         f= open("official_predict.txt", "w")
         f.write(fileStr)
@@ -73,11 +71,36 @@ def main():
         for i in range(len(restKeyList)):
             retDict[restKeyList[i]] = predictions[i]
         
-        print (retDict)
-       # fb.saveResponse(retDict)
+        
+        #check user restaurants:
+        fileStr=""
+        userRestDict={} # key: id, value: vector
+        for d in userRestData:
+            userRestDict[d[0]["id"]] = d[1]
+        
+        userRestKeyList = list(userRestDict.keys())
+        for k in userRestKeyList:
+            tmp = ParseData.combineUserAndYelp(userArr, userRestDict[k])
 
+            tmp = [str(x) for x in tmp]
+            fileStr +=",".join(tmp) +"\n"
 
+        f= open("official_predict.txt", "w")
+        f.write(fileStr)
+        f.close()
 
+        predictions = model.getPrediction("official_predict.txt")
+
+        for i in range(len(userRestKeyList)):
+            retDict[userRestKeyList[i]] = predictions[i] +0.5
+        
+        retList= sorted(retDict.items(), key=lambda value: value[1])
+        retList = [list(x) for x in retList]
+        
+        for k in retList:
+            k[1]=str(k[1])
+        print (retList)
+        fb.push_update(retList)
 
 
 
