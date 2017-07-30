@@ -27,6 +27,14 @@ class FBData:
 	# Fix authentication
 	# only search good ids
 	# add additional case for no categories
+    
+    def saveResponse(res):
+        pass
+    
+    def isDone():
+        pass
+    
+    
 
 
 

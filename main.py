@@ -2,13 +2,13 @@ import threading
 import time
 import ParseData
 #import YelpFetch
-import Model
+from Model import Model
 #import firebase
 
 def main():
-    Model.deleteModels()
     model = Model(4)
-    model.trainModel("train.txt")
+    Model.deleteModels()
+    model.trainModel("train.txt")           
     print (model.getPrediction("predictdata.txt"))
 
     while True:
