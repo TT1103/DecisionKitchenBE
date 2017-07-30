@@ -56,7 +56,7 @@ class FBData:
 				money = 0
 			money_total.append(money)
 		#Deliv is still bad
-		return filter(lambda x: x != None, sols), money, category, deliv
+		return filter(lambda x: x != None, sols), sum(money_total) / len(money_total), category, deliv
 	# Fix authentication
 	# only search good ids
 	# add additional case for no categories
