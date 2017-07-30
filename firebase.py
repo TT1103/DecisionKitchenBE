@@ -18,11 +18,16 @@ class FBData:
 
 	def start(self):
 		print("hello")
-		users = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("restaurants").get()
+		restraunts = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("restaurants").get()
 		sols = []
-		for i in users.val().keys():
+		for i in restraunts.val().keys():
 			mine = YelpFetch.YelpFetcher(['breakfast_brunch', 'chinese', 'diners', 'hotdogs', 'hotpot', 'italian', 'japanese', 'korean', 'mongolian', 'pizza', 'steak', 'sushi', 'tradamerican', 'vegetarian'])
 			sols.append(mine.vectorize(mine.search_ID(i))[1])
+
+		response_base = self.db.child("groups").child('2120b04c-bd1e-42c8-abf1-08fd4fde8133').child("games").child("0").child("responses").get()
+		for i in response_base.val().keys():
+
+
 		return sols
 	# Fix authentication
 	# only search good ids
