@@ -11,6 +11,7 @@ FEATURE_COLUMNS = []
 COLUMNS = []
 df_train = None
 df_predict = None
+featureList = None
 def input_fn(df):
     continuous_cols = {i: tf.constant(df[i].values) for i in FEATURE_COLUMNS}
     feature_cols = dict(continuous_cols.items())
@@ -32,6 +33,7 @@ def trainModel(filename, numFeatures):
     global COLUMNS
     global df_train
     global df_predict
+    global featureList
     
     COLUMNS = [str(x) for x in range(numFeatures)]
     FEATURE_COLUMNS = COLUMNS[:-1]
@@ -50,25 +52,27 @@ def trainModel(filename, numFeatures):
         learning_rate=LEARNING_RATE),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
     e.fit(input_fn=train_input_fn, steps=TRAINING_STEPS)
     
-    
     df_predict = pd.read_csv("predictdata.txt", names=FEATURE_COLUMNS, skipinitialspace=True)
     
+
+def getBestRestaurants(filename, numFeatures):
+    global df_predict 
+    global FEATURE_COLUMNS
     
-    #debug, remove later
+    FEATURE_COLUMNS = [str(x) for x in range(numFeatures)]
+    df_predict = pd.read_csv(filename, names=FEATURE_COLUMNS, skipinitialspace=True)
+    featureList=[]
+    for f in FEATURE_COLUMNS:
+        featureList.append(tf.contrib.layers.real_valued_column(f))
+        
+    e = tf.contrib.learn.LinearRegressor(feature_columns=featureList, optimizer=tf.train.FtrlOptimizer(
+        learning_rate=LEARNING_RATE),model_dir="/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model") 
+    
     print ("Predicting Data:")
     results = e.predict_scores(input_fn=predict_input_fn)
     for key in sorted(results):
         print (key)
-    
-
-def getBestRestaurants(filename, numFeatures):
-    with tf.Session(graph=graph) as session:
-        checkpoint = tf.train.get_checkpoint_state("/Users/TigerZhao/Desktop/angelhack/DecisionKitchenBE/model")
-        saver.restore(session, ckpt.model_checkpoint_path)
-        feed_dict = {tf_train_dataset : batch_data}
-        predictions = session.run([test_prediction], feed_dict)
-    
-    
-
+        
+        
 trainModel("train.txt", 3)
 getBestRestaurants("predictdata.txt",2)
