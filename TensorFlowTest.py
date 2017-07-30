@@ -1,15 +1,52 @@
 import tempfile
 import urllib
 import tensorflow as tf
-import pandas as panda
+import pandas as pd
 
 
-COLUMNS = ["Category", "Price", "Rating", "Rating_Count", "Correctness"]
-LABEL_COLUMN = "Label"
-#df_train =
-#df_test =
+TRAINING_STEPS = 200
+
+featureData = [] # get an array of values from austin that are already parsed
+
+featureList = []
+'''
+#iterate through the featuresData and create a feature for each data piece
+for i in range(len(featureData)):
+    temp = tf.contrib.layers.real_valued_column(str(i))
+    featureList.append(temp) 
+
+ids = range(len(featureData))
+'''
+df_train = pd.read_csv(train_file, names=ids, skipinitialspace=True)
+print (type(df_train))
 
 
+'''
+
+
+e = tf.contrib.learn.LinearClassifier(feature_columns=featureList) 
+e.fit(input_fn=input_fn_train, steps=TRAINING_STEPS)
+
+# Evaluate for one step (one pass through the test data).
+results = e.evaluate(input_fn=input_fn_test, steps=1)
+
+# Print the stats for the evaluation.
+for key in sorted(results):
+        print("%s: %s" % (key, results[key]))
+
+
+
+
+
+
+
+
+
+
+#COLUMNS = ["Category", "Price", "Rating", "Rating_Count", "Correctness"]
+#LABEL_COLUMN = "Label"
+df_train =
+df_test =
 #df_train[LABEL_COLUMN] = df_train["Correctness"]
 #df_test[LABEL_COLUMN] = df_test["Correctness"]
 
@@ -35,12 +72,6 @@ def input_fn(df):
   return feature_cols, label
 
 
-category =  tf.contrib.layers.sparse_column_with_hash_bucket("Category", hash_bucket_size=200)
-price = tf.contrib.layers.real_valued_column("age")
-rating = tf.contrib.layers.real_valued_column("age")
-rating_count = tf.contrib.layers.real_valued_column("age")
-#This will probably break, useful tho
-#rating_and_count = tf.contrib.layers.crossed_column([rating, rating_count])
 
 
 
@@ -49,3 +80,5 @@ def train_input_fn():
 
 def eval_input_fn():
   return input_fn(df_test)
+
+  '''
