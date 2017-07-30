@@ -72,6 +72,13 @@ class FBData:
 
     def push_update(self, top_restaurants):
         data = top_restaurants
+        fetcher = YelpFetch.YelpFetcher([])
+        restaurants = self.db.child("groups").child(self.group).child("restaurants").get().val()
+        for restaurant in data:
+            if restaurants == None or (not restaurant[0] in restaurants): # Push to firebase
+                data = fetcher.search_ID(restaurant[0])
+                print(data)
+
         self.db.child("groups").child(self.group).child("games").child("0").child("result").set(data)
         return True
 
