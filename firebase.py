@@ -1,5 +1,6 @@
 import pyrebase
 import YelpFetch
+import datetime
 
 class FBData:
     def __init__(self, group):
@@ -87,6 +88,7 @@ class FBData:
                 })
 
         self.db.child("groups").child(self.group).child("games").child("0").child("result").set(data)
+        self.db.child("groups").child(self.group).child("games").child("0").child("meta").child("end").set(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S") + "Z")
         return True
 
 
