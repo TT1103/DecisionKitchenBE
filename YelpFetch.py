@@ -20,16 +20,16 @@ with open("categories.json", "r") as file:
             parents[i["parents"][k]].extend([i["title"],i["alias"]])
 
 # Search queries Yelp's API and returns a dict with the info.
-aliases = ["tradamerican", "indpak", "chinese", "sushi", "mongolian"]
+
 class YelpFetcher():
-	def __init__(self):
-		global token, aliases
+	def __init__(self, aliases):
+		global token
 		self.authtoken = token
 		self.aliases = aliases
 
 
-	def search(self, lat, lon, categories=aliases, price=[], isOpen=True, delivery=False):
-		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + ("&categories=" + ",".join(categories) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
+	def search(self, lat, lon, price=[], isOpen=True, delivery=False):
+		apiString = "https://api.yelp.com/v3/" + ("transactions/delivery/" if delivery else "businesses/") + "search?latitude=" + str(lat) + "&longitude=" + str(lon) + ("&categories=" + ",".join(self.aliases) + "&price=" + ",".join(price) + "&is_open=" + str(isOpen).lower() if not delivery else "")
 		print(apiString)
 		request = requests.get(apiString, headers={'Authorization': self.authtoken})
 		return json.loads(request.text)
@@ -80,9 +80,19 @@ class YelpFetcher():
 		vector.append(json["review_count"])	
 		return [json, vector]
 
-mine = YelpFetcher()
-print()
-this = mine.search(37.5737019, -122.3269701)
-print(this)
-for i in this['businesses']:
-	print(mine.vectorize(i)[1])
+	def vectors_nearest(self, lat, lon, full_data_bool):
+		# Full_data_bool is a boolean stating whether you want all restaurant data or just the vector
+		# Note that delivery/open is always bool set to true/false
+		searching = self.search(lat, lon)
+		values = []
+		for i in searching["businesses"]:
+			if full_data_bool:
+				values.append(self.vectorize(i))
+			else:
+				values.append(self.vectorize(i)[1])
+		return values
+
+
+
+mine = YelpFetcher(["tradamerican", "indpak", "chinese", "sushi", "mongolian"])
+print(mine.vectors_nearest(37.5737019, -122.3269701, False))
